@@ -1,0 +1,26 @@
+/* options.css */
+body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    background: linear-gradient(135deg, #2c3e50, #4ca1af);
+    font-family: Arial, sans-serif;
+    color: #f0f8ff;
+    margin: 0;
+}
+
+.main {
+    text-align: center;
+    max-width: 600px;
+}
+
+h1 {
+    font-size: 3rem;
+}
+
+.quote {
+    font-size: 1.5rem;
+    color: #e0e0e0;
+    margin-top: 20px;
+}

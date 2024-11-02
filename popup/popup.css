@@ -1,0 +1,33 @@
+/* popup.css */
+body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    background: linear-gradient(135deg, #5A9FD4, #72C1E1);
+    color: #fff;
+}
+
+.container {
+    padding: 20px;
+}
+
+.timer {
+    margin-top: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+input[type="number"] {
+    padding: 8px;
+    width: 80px;
+    margin-right: 8px;
+    border-radius: 5px;
+}
+
+button {
+    padding: 8px 15px;
+    background-color: #1e90ff;
+    color: #fff;
+    border-radius: 5px;
+    cursor: pointer;
+}
