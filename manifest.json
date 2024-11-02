@@ -4,7 +4,12 @@
     "version": "1.0",
     "description": "Blocks distractions, motivates with coding quotes, and boosts productivity.",
     "action": {
-        "default_popup": "popup/popup.html"
+        "default_popup": "popup/popup.html",
+        "default_icon": {
+            "16": "assets/logo.png",
+            "48": "assets/logo.png",
+            "128": "assets/logo.png"
+        }
     },
     "chrome_url_overrides": {
         "newtab": "options/options.html"
