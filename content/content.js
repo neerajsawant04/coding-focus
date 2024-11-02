@@ -1,16 +1,24 @@
-// content.js
+// content/content.js
+import motivationalQuotes from './motivationalQuotes.js'; // Adjust the path as necessary
 
-const blockedSites = ["facebook.com", "twitter.com", "instagram.com"];
+const blockedSites = ["instagram.com", "twitter.com", "facebook.com"];
 
-chrome.storage.local.get("isFocusModeOn", (data) => {
-    if (data.isFocusModeOn) {
-        blockedSites.forEach((site) => {
-            if (window.location.href.includes(site)) {
-                document.body.innerHTML = "<h1>Focus Mode Active. Site Blocked!</h1>";
-                document.body.style.textAlign = "center";
-                document.body.style.fontFamily = "Arial, sans-serif";
-                document.body.style.color = "#ff4d4d";
-            }
-        });
+// Function to check if the current URL is blocked
+function checkBlockedSite() {
+    const currentUrl = window.location.href;
+    const isBlocked = blockedSites.some(site => currentUrl.includes(site));
+
+    if (isBlocked) {
+        // Prevent the user from accessing the site
+        alert(getRandomQuote()); // Show a random motivational quote
+        window.location.href = "about:blank"; // Redirect to a blank page
     }
-});
+}
+
+// Function to get a random motivational quote
+function getRandomQuote() {
+    return motivationalQuotes[Math.floor(Math.random() * motivationalQuotes.length)];
+}
+
+// Check for blocked sites when the content script loads
+checkBlockedSite();
