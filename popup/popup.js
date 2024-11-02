@@ -1,9 +1,7 @@
-// popup.js
-
-// Websites to block
+// List of websites to block (adjust or add as needed)
 const blockedSites = ["instagram.com", "twitter.com", "facebook.com"];
 
-// Start button click event
+// Handle Start button click
 document.getElementById('startButton').addEventListener('click', function() {
     const minutes = parseInt(document.getElementById('minutes').value);
     if (isNaN(minutes) || minutes <= 0) {
@@ -23,48 +21,54 @@ document.getElementById('startButton').addEventListener('click', function() {
 
 // Function to block sites
 function blockSites() {
-    // First, remove any existing rules to avoid conflicts
+    // Remove any existing rules with the specified IDs to avoid conflicts
     chrome.declarativeNetRequest.updateDynamicRules({
         removeRuleIds: [1, 2, 3]
     }, () => {
-        // Now add the blocking rules with unique integer IDs
-        chrome.declarativeNetRequest.updateDynamicRules({
-            addRules: [
-                {
-                    id: 1, // Unique integer for rule ID
-                    priority: 1,
-                    action: { type: 'block' },
-                    condition: {
-                        urlFilter: "*://*.instagram.com/*",
-                        resourceTypes: ["main_frame"]
-                    }
-                },
-                {
-                    id: 2, // Unique integer for rule ID
-                    priority: 1,
-                    action: { type: 'block' },
-                    condition: {
-                        urlFilter: "*://*.twitter.com/*",
-                        resourceTypes: ["main_frame"]
-                    }
-                },
-                {
-                    id: 3, // Unique integer for rule ID
-                    priority: 1,
-                    action: { type: 'block' },
-                    condition: {
-                        urlFilter: "*://*.facebook.com/*",
-                        resourceTypes: ["main_frame"]
-                    }
+        // Define blocking rules
+        const rules = [
+            {
+                id: 1,
+                priority: 1,
+                action: { type: 'block' },
+                condition: {
+                    urlFilter: "*://*.instagram.com/*",
+                    resourceTypes: ["main_frame"]
                 }
-            ]
+            },
+            {
+                id: 2,
+                priority: 1,
+                action: { type: 'block' },
+                condition: {
+                    urlFilter: "*://*.twitter.com/*",
+                    resourceTypes: ["main_frame"]
+                }
+            },
+            {
+                id: 3,
+                priority: 1,
+                action: { type: 'block' },
+                condition: {
+                    urlFilter: "*://*.facebook.com/*",
+                    resourceTypes: ["main_frame"]
+                }
+            }
+        ];
+
+        // Add the rules for blocking websites
+        chrome.declarativeNetRequest.updateDynamicRules({ addRules: rules }, () => {
+            console.log("Blocking rules applied.");
         });
     });
 }
 
 // Function to unblock sites
 function unblockSites() {
+    // Remove the rules with specified IDs to unblock the sites
     chrome.declarativeNetRequest.updateDynamicRules({
         removeRuleIds: [1, 2, 3]
+    }, () => {
+        console.log("Blocking rules removed.");
     });
 }

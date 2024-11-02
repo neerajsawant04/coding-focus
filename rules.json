@@ -13,7 +13,7 @@
         "priority": 1,
         "action": { "type": "block" },
         "condition": {
-            "urlFilter": "*://*.twitter.com/*",
+            "urlFilter": "*://*.x.com/*",
             "resourceTypes": ["main_frame"]
         }
     },
