@@ -1,37 +1,76 @@
-/* popup.css */
-
 body {
-    font-family: Arial, sans-serif;
+    font-family: 'Arial', sans-serif;
     margin: 0;
     padding: 20px;
-    text-align: center;
-    background-color: #f3f4f6;
+    background-color: #f0f4f8;
+    color: #333;
+    width: 300px; /* Width of the popup */
+    box-sizing: border-box;
 }
 
 .container {
-    width: 200px;
-    margin: 0 auto;
+    text-align: center;
+}
+
+h1 {
+    color: #2c3e50; /* Darker color for header */
+    margin-bottom: 10px;
 }
 
 .timer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
     margin: 20px 0;
 }
 
 input[type="number"] {
-    padding: 5px;
-    width: 80%;
-    margin-bottom: 10px;
+    width: 60px;
+    padding: 10px;
+    border: 2px solid #2980b9; /* Blue border */
+    border-radius: 4px;
+    font-size: 16px;
+    margin-right: 10px;
+    transition: border 0.3s ease;
+}
+
+input[type="number"]:focus {
+    outline: none;
+    border-color: #3498db; /* Lighter blue on focus */
 }
 
 button {
-    padding: 10px 20px;
-    background-color: #50E3C2;
-    border: none;
+    padding: 10px 15px;
+    background-color: #2980b9; /* Button color */
     color: white;
-    cursor: pointer;
+    border: none;
+    border-radius: 4px;
     font-size: 16px;
+    cursor: pointer;
+    transition: background 0.3s ease;
 }
 
 button:hover {
-    background-color: #3bc4a2;
+    background-color: #3498db; /* Lighter button on hover */
+}
+
+.motivation {
+    font-style: italic;
+    margin: 20px 0;
+}
+
+.usage-stats {
+    background-color: #ecf0f1; /* Light gray background for stats */
+    border-radius: 4px;
+    padding: 10px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); /* Shadow for depth */
+}
+
+.usage-stats p {
+    margin: 5px 0; /* Space between lines */
+    color: #2c3e50; /* Darker color for text */
+}
+#timerDisplay {
+    font-weight: bold;
+    color: #ff0000; /* Red color for visibility */
 }

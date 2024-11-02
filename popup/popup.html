@@ -3,18 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Focus Mode</title>
     <link rel="stylesheet" href="popup.css">
+    <title>Focus Mode</title>
 </head>
 <body>
     <div class="container">
         <h1>Focus Mode</h1>
         <p>Set your focus time:</p>
         <div class="timer">
-            <input type="number" id="minutes" min="1" max="60" placeholder="Minutes">
+            <input type="number" id="minutes" min="1" max="60" placeholder="Minutes" required>
             <button id="startButton">Start</button>
         </div>
+        <p id="timerDisplay" style="font-size: 20px; margin-top: 20px;"></p> <!-- Timer display -->
         <p class="motivation">Stay focused and keep coding!</p>
+        
+        <div id="usageStats" class="usage-stats">
+            <p id="blockedTime">Blocked Time: 0 minutes</p>
+            <p id="productiveTime">Productive Time: 0 minutes</p>
+        </div>
     </div>
     <script src="popup.js"></script>
 </body>

@@ -1,7 +1,7 @@
-// List of websites to block (adjust or add as needed)
+// Websites to block
 const blockedSites = ["instagram.com", "twitter.com", "facebook.com"];
 
-// Handle Start button click
+// Start button click event
 document.getElementById('startButton').addEventListener('click', function() {
     const minutes = parseInt(document.getElementById('minutes').value);
     if (isNaN(minutes) || minutes <= 0) {
@@ -15,60 +15,101 @@ document.getElementById('startButton').addEventListener('click', function() {
     // Block sites
     blockSites();
 
-    // Set a timeout to unblock sites after the specified time
-    setTimeout(unblockSites, timeToBlock);
+    // Start the countdown timer
+    startCountdown(timeToBlock);
 });
+
+// Function to start the countdown
+function startCountdown(duration) {
+    const timerDisplay = document.getElementById('timerDisplay'); // Get the timer display element
+    let remainingTime = duration;
+
+    // Save the timer state in storage
+    chrome.storage.local.set({ remainingTime, isBlocking: true });
+
+    // Update display immediately
+    updateTimerDisplay(timerDisplay, remainingTime);
+
+    const countdownInterval = setInterval(() => {
+        remainingTime -= 1000; // Decrease the remaining time by 1 second
+
+        // Save updated time
+        chrome.storage.local.set({ remainingTime });
+
+        // Update the timer display
+        updateTimerDisplay(timerDisplay, remainingTime);
+
+        // If the timer runs out
+        if (remainingTime <= 0) {
+            clearInterval(countdownInterval); // Stop the countdown
+            unblockSites(); // Unblock the sites
+            timerDisplay.textContent = "Time's up! You can now browse freely."; // Final message
+            chrome.storage.local.set({ isBlocking: false }); // Reset blocking state
+        }
+    }, 1000);
+}
+
+// Function to update timer display
+function updateTimerDisplay(timerDisplay, remainingTime) {
+    const seconds = Math.floor((remainingTime / 1000) % 60);
+    const minutes = Math.floor((remainingTime / 1000 / 60) % 60);
+    timerDisplay.textContent = `Time Remaining: ${minutes}:${seconds < 10 ? '0' + seconds : seconds}`;
+}
 
 // Function to block sites
 function blockSites() {
-    // Remove any existing rules with the specified IDs to avoid conflicts
     chrome.declarativeNetRequest.updateDynamicRules({
         removeRuleIds: [1, 2, 3]
     }, () => {
-        // Define blocking rules
-        const rules = [
-            {
-                id: 1,
-                priority: 1,
-                action: { type: 'block' },
-                condition: {
-                    urlFilter: "*://*.instagram.com/*",
-                    resourceTypes: ["main_frame"]
+        // Now add the blocking rules with unique integer IDs
+        chrome.declarativeNetRequest.updateDynamicRules({
+            addRules: [
+                {
+                    id: 1,
+                    priority: 1,
+                    action: { type: 'block' },
+                    condition: {
+                        urlFilter: "*://*.instagram.com/*",
+                        resourceTypes: ["main_frame"]
+                    }
+                },
+                {
+                    id: 2,
+                    priority: 1,
+                    action: { type: 'block' },
+                    condition: {
+                        urlFilter: "*://*.twitter.com/*",
+                        resourceTypes: ["main_frame"]
+                    }
+                },
+                {
+                    id: 3,
+                    priority: 1,
+                    action: { type: 'block' },
+                    condition: {
+                        urlFilter: "*://*.facebook.com/*",
+                        resourceTypes: ["main_frame"]
+                    }
                 }
-            },
-            {
-                id: 2,
-                priority: 1,
-                action: { type: 'block' },
-                condition: {
-                    urlFilter: "*://*.twitter.com/*",
-                    resourceTypes: ["main_frame"]
-                }
-            },
-            {
-                id: 3,
-                priority: 1,
-                action: { type: 'block' },
-                condition: {
-                    urlFilter: "*://*.facebook.com/*",
-                    resourceTypes: ["main_frame"]
-                }
-            }
-        ];
-
-        // Add the rules for blocking websites
-        chrome.declarativeNetRequest.updateDynamicRules({ addRules: rules }, () => {
-            console.log("Blocking rules applied.");
+            ]
         });
     });
 }
 
 // Function to unblock sites
 function unblockSites() {
-    // Remove the rules with specified IDs to unblock the sites
     chrome.declarativeNetRequest.updateDynamicRules({
         removeRuleIds: [1, 2, 3]
-    }, () => {
-        console.log("Blocking rules removed.");
+    });
+}
+
+// On popup load, check if timer is still running
+window.onload = function() {
+    chrome.storage.local.get(['remainingTime', 'isBlocking'], function(result) {
+        if (result.isBlocking && result.remainingTime > 0) {
+            startCountdown(result.remainingTime); // Restart the countdown if it was active
+        } else {
+            document.getElementById('timerDisplay').textContent = "Timer not active.";
+        }
     });
 }

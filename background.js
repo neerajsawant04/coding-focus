@@ -1,68 +1,52 @@
-// Background script for managing focus timer and blocking/unblocking websites
+let timeSpentOnBlockedSites = 0;
+let timeSpentOnProductiveSites = 0;
+let currentSite = null;
+let timer = null;
 
-chrome.runtime.onInstalled.addListener(() => {
-    console.log("Focus Mode extension installed.");
-});
+// Websites to block
+const blockedSites = ["instagram.com", "twitter.com", "facebook.com"];
 
-// Listen for messages from popup.js to start and stop the focus timer
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-    if (message.action === "startFocus") {
-        const duration = message.duration;
-        startBlocking(duration);
-        sendResponse({ status: "Blocking started for " + duration + " minutes." });
-    } else if (message.action === "stopFocus") {
-        stopBlocking();
-        sendResponse({ status: "Blocking stopped." });
+// Function to determine if a site is blocked
+function isBlockedSite(url) {
+    return blockedSites.some(site => url.includes(site));
+}
+
+// Function to start the timer
+function startTimer() {
+    if (timer) return; // Prevent multiple timers
+    timer = setInterval(() => {
+        if (currentSite && isBlockedSite(currentSite)) {
+            timeSpentOnBlockedSites += 1; // Increment by 1 minute
+        } else {
+            timeSpentOnProductiveSites += 1; // Increment by 1 minute
+        }
+    }, 60000); // Every minute
+}
+
+// Function to stop the timer
+function stopTimer() {
+    clearInterval(timer);
+    timer = null;
+}
+
+// Monitor tab updates
+chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+    if (changeInfo.status === 'complete' && tab.url) {
+        currentSite = tab.url;
+        if (isBlockedSite(currentSite)) {
+            startTimer();
+        } else {
+            stopTimer();
+        }
     }
 });
 
-// Function to start blocking websites
-function startBlocking(duration) {
-    chrome.declarativeNetRequest.updateDynamicRules({
-        addRules: [
-            {
-                id: 1,
-                priority: 1,
-                action: { type: "block" },
-                condition: {
-                    urlFilter: "*://*.instagram.com/*",
-                    resourceTypes: ["main_frame"]
-                }
-            },
-            {
-                id: 2,
-                priority: 1,
-                action: { type: "block" },
-                condition: {
-                    urlFilter: "*://*.twitter.com/*",
-                    resourceTypes: ["main_frame"]
-                }
-            },
-            {
-                id: 3,
-                priority: 1,
-                action: { type: "block" },
-                condition: {
-                    urlFilter: "*://*.facebook.com/*",
-                    resourceTypes: ["main_frame"]
-                }
-            }
-        ]
-    }, () => {
-        console.log("Blocking rules applied.");
-
-        // Set a timeout to stop blocking after the specified duration
-        setTimeout(() => {
-            stopBlocking();
-        }, duration * 60 * 1000); // Convert minutes to milliseconds
-    });
-}
-
-// Function to stop blocking websites
-function stopBlocking() {
-    chrome.declarativeNetRequest.updateDynamicRules({
-        removeRuleIds: [1, 2, 3]
-    }, () => {
-        console.log("Blocking rules removed.");
-    });
-}
+// You can also implement a method to send stats to the popup
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+    if (request.type === 'getUsageStats') {
+        sendResponse({
+            blocked: timeSpentOnBlockedSites,
+            productive: timeSpentOnProductiveSites
+        });
+    }
+});
