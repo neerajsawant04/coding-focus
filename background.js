@@ -1,52 +1,106 @@
-let timeSpentOnBlockedSites = 0;
-let timeSpentOnProductiveSites = 0;
-let currentSite = null;
-let timer = null;
+let countdownTimer = null;
+let remainingTime = 0; // in milliseconds
+let isBlocking = false;
 
-// Websites to block
-const blockedSites = ["instagram.com", "twitter.com", "facebook.com"];
-
-// Function to determine if a site is blocked
-function isBlockedSite(url) {
-    return blockedSites.some(site => url.includes(site));
-}
+// Listener for messages from the popup
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+    if (message.action === "startTimer") {
+        startTimer(message.minutes);
+        sendResponse({ status: "Timer started" });
+    } else if (message.action === "stopTimer") {
+        stopTimer();
+        sendResponse({ status: "Timer stopped" });
+    } else if (message.action === "getTimerStatus") {
+        sendResponse({ remainingTime, isBlocking });
+    }
+});
 
 // Function to start the timer
-function startTimer() {
-    if (timer) return; // Prevent multiple timers
-    timer = setInterval(() => {
-        if (currentSite && isBlockedSite(currentSite)) {
-            timeSpentOnBlockedSites += 1; // Increment by 1 minute
+function startTimer(minutes) {
+    if (countdownTimer) {
+        clearInterval(countdownTimer);
+    }
+
+    remainingTime = minutes * 60 * 1000; // Convert to milliseconds
+    isBlocking = true;
+    blockSites();
+
+    countdownTimer = setInterval(() => {
+        if (remainingTime > 0) {
+            remainingTime -= 1000; // Decrease by 1 second
         } else {
-            timeSpentOnProductiveSites += 1; // Increment by 1 minute
+            clearInterval(countdownTimer);
+            countdownTimer = null;
+            isBlocking = false;
+            unblockSites();
+            showNotification("Congratulations! Time's up!"); // Show notification
         }
-    }, 60000); // Every minute
+    }, 1000);
 }
 
 // Function to stop the timer
 function stopTimer() {
-    clearInterval(timer);
-    timer = null;
+    if (countdownTimer) {
+        clearInterval(countdownTimer);
+        countdownTimer = null;
+        isBlocking = false;
+        unblockSites();
+    }
 }
 
-// Monitor tab updates
-chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
-    if (changeInfo.status === 'complete' && tab.url) {
-        currentSite = tab.url;
-        if (isBlockedSite(currentSite)) {
-            startTimer();
-        } else {
-            stopTimer();
-        }
-    }
-});
+// Function to show a notification
+function showNotification(message) {
+    chrome.notifications.create({
+        type: "basic",
+        iconUrl: "icon.png", // Your icon image path
+        title: "Focus Mode",
+        message: message,
+        priority: 2
+    });
+}
 
-// You can also implement a method to send stats to the popup
-chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-    if (request.type === 'getUsageStats') {
-        sendResponse({
-            blocked: timeSpentOnBlockedSites,
-            productive: timeSpentOnProductiveSites
+// Function to block sites
+function blockSites() {
+    chrome.declarativeNetRequest.updateDynamicRules({
+        removeRuleIds: [1, 2, 3]
+    }, () => {
+        chrome.declarativeNetRequest.updateDynamicRules({
+            addRules: [
+                {
+                    id: 1,
+                    priority: 1,
+                    action: { type: 'block' },
+                    condition: {
+                        urlFilter: "*://*.instagram.com/*",
+                        resourceTypes: ["main_frame"]
+                    }
+                },
+                {
+                    id: 2,
+                    priority: 1,
+                    action: { type: 'block' },
+                    condition: {
+                        urlFilter: "*://*.twitter.com/*",
+                        resourceTypes: ["main_frame"]
+                    }
+                },
+                {
+                    id: 3,
+                    priority: 1,
+                    action: { type: 'block' },
+                    condition: {
+                        urlFilter: "*://*.facebook.com/*",
+                        resourceTypes: ["main_frame"]
+                    }
+                }
+            ]
         });
-    }
-});
+    });
+}
+
+// Function to unblock sites
+function unblockSites() {
+    chrome.declarativeNetRequest.updateDynamicRules({
+        removeRuleIds: [1, 2, 3]
+    });
+}
