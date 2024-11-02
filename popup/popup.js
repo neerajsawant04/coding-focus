@@ -23,52 +23,48 @@ document.getElementById('startButton').addEventListener('click', function() {
 
 // Function to block sites
 function blockSites() {
-    chrome.tabs.query({}, function(tabs) {
-        tabs.forEach(function(tab) {
-            const url = new URL(tab.url);
-            if (blockedSites.some(site => url.hostname.includes(site))) {
-                chrome.tabs.update(tab.id, { url: "about:blank" }); // Redirect to a blank page
-            }
-        });
-    });
-
-    // Add the blocking rules
+    // First, remove any existing rules to avoid conflicts
     chrome.declarativeNetRequest.updateDynamicRules({
-        addRules: [
-            {
-                id: 'block-websites',
-                priority: 1,
-                action: { type: 'block' },
-                condition: {
-                    urlFilter: '*://*.instagram.com/*',
-                    resourceTypes: ['main_frame'],
+        removeRuleIds: [1, 2, 3]
+    }, () => {
+        // Now add the blocking rules with unique integer IDs
+        chrome.declarativeNetRequest.updateDynamicRules({
+            addRules: [
+                {
+                    id: 1, // Unique integer for rule ID
+                    priority: 1,
+                    action: { type: 'block' },
+                    condition: {
+                        urlFilter: "*://*.instagram.com/*",
+                        resourceTypes: ["main_frame"]
+                    }
                 },
-            },
-            {
-                id: 'block-twitter',
-                priority: 1,
-                action: { type: 'block' },
-                condition: {
-                    urlFilter: '*://*.twitter.com/*',
-                    resourceTypes: ['main_frame'],
+                {
+                    id: 2, // Unique integer for rule ID
+                    priority: 1,
+                    action: { type: 'block' },
+                    condition: {
+                        urlFilter: "*://*.twitter.com/*",
+                        resourceTypes: ["main_frame"]
+                    }
                 },
-            },
-            {
-                id: 'block-facebook',
-                priority: 1,
-                action: { type: 'block' },
-                condition: {
-                    urlFilter: '*://*.facebook.com/*',
-                    resourceTypes: ['main_frame'],
-                },
-            },
-        ],
+                {
+                    id: 3, // Unique integer for rule ID
+                    priority: 1,
+                    action: { type: 'block' },
+                    condition: {
+                        urlFilter: "*://*.facebook.com/*",
+                        resourceTypes: ["main_frame"]
+                    }
+                }
+            ]
+        });
     });
 }
 
 // Function to unblock sites
 function unblockSites() {
     chrome.declarativeNetRequest.updateDynamicRules({
-        removeRuleIds: ['block-websites', 'block-twitter', 'block-facebook'],
+        removeRuleIds: [1, 2, 3]
     });
 }

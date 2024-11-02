@@ -25,5 +25,14 @@
             "js": ["content/content.js"]
         }
     ],
-    "options_page": "options/options.html"
+    "options_page": "options/options.html",
+    "declarative_net_request": {
+        "rule_resources": [
+            {
+                "id": "ruleset_1",
+                "enabled": true,
+                "path": "rules.json"
+            }
+        ]
     }
+}
